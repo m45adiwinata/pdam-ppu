@@ -24,6 +24,7 @@
                 <th>Data Awal</th>
                 <th colspan="2">Sebelum Migrasi</th>
                 <th colspan="2">Setelah Migrasi</th>
+                <th colspan="2">Selisih</th>
             </tr>
         </thead>
         <tbody>
@@ -33,14 +34,15 @@
                 <td>Rekair</td>
                 <td>Lembar</td>
                 <td>Rekair</td>
+                <td>Lembar</td>
+                <td>Rekair</td>
             </tr>
             <?php 
                 require_once('connection.php');
-                $sql = "SELECT tahun, COUNT(*) AS lembar, SUM(total_tarif) as rekair FROM billing WHERE tgl_bayar IS NULL GROUP BY tahun";
+                $sql = "SELECT LEFT(periode,4) AS tahun, COUNT(*) AS lembar, SUM(dnmet+adm+r1+r2+r3+r4) as rekair FROM ppubilling.rekair WHERE tgl_byr <= '1945-08-17' AND statrek = 'A' GROUP BY LEFT(periode,4)";
                 $result = $conn->query($sql);
-
-                $sql2 = "SELECT LEFT(periode, 4) AS tahun, COUNT(*) AS lembar, SUM(rekair) AS rekair FROM piutang GROUP BY LEFT(periode, 4)";
-                $result2 = $conn2->query($sql2);
+                $sql2 = "SELECT LEFT(periode, 4) AS tahun, COUNT(*) AS lembar, SUM(rekair) AS rekair FROM ppu_loket_tes.piutang GROUP BY LEFT(periode, 4)";
+                $result2 = $conn->query($sql2);
                 if ($result->num_rows > 0) {
                     $row2 = $result2->fetch_all(MYSQLI_ASSOC);
                     $i = 0;
@@ -52,6 +54,8 @@
                         if ($row['tahun'] == $row2[$i]['tahun']) {
                             echo "<td style='text-align:right;'>".$row2[$i]['lembar']."</td>
                                     <td style='text-align:right;'>Rp".number_format($row2[$i]['rekair'],0,',','.')."</td>";
+                            echo "<td style='text-align:right;'>".($row['lembar']-$row2[$i]['lembar'])."</td>
+                                    <td style='text-align:right;'>Rp".number_format($row['rekair']-$row2[$i]['rekair'],0,',','.')."</td>";
                             $i++;
                         } else {
                             echo "<td></td><td></td>";

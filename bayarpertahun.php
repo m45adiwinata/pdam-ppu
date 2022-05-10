@@ -24,6 +24,7 @@
                 <th>Data Awal</th>
                 <th colspan="2">Sebelum Migrasi</th>
                 <th colspan="2">Setelah Migrasi</th>
+                <th colspan="2">Selisih</th>
             </tr>
         </thead>
         <tbody>
@@ -33,13 +34,15 @@
                 <td>total</td>
                 <td>Lembar</td>
                 <td>total</td>
+                <td>Lembar</td>
+                <td>total</td>
             </tr>
             <?php 
                 require_once('connection.php');
-                $sql = "SELECT YEAR(tgl_bayar) AS tahun, COUNT(*) AS lembar, SUM(total_tarif+denda) as total FROM billing WHERE tgl_bayar IS NOT NULL AND tahun >= '2016' GROUP BY YEAR(tgl_bayar)";
+                $sql = "SELECT YEAR(tgl_byr) AS tahun, COUNT(*) AS lembar, SUM(dnmet+adm+r1+r2+r3+r4+denda) as total FROM ppubilling.rekair WHERE tgl_byr > '1945-08-17' AND statrek = 'A' GROUP BY YEAR(tgl_byr)";
                 $result = $conn->query($sql);
-                $sql2 = "SELECT YEAR(tglbayar) AS tahun, COUNT(*) AS lembar, SUM(rekair+dendatunggakan) AS total FROM bayar GROUP BY YEAR(tglbayar)";
-                $result2 = $conn2->query($sql2);
+                $sql2 = "SELECT YEAR(tglbayar) AS tahun, COUNT(*) AS lembar, SUM(rekair+dendatunggakan) AS total FROM ppu_loket_tes.bayar GROUP BY YEAR(tglbayar)";
+                $result2 = $conn->query($sql2);
                 if ($result->num_rows > 0) {
                     $row2 = $result2->fetch_all(MYSQLI_ASSOC);
                     $i = 0;
@@ -51,9 +54,11 @@
                         if ($row['tahun'] == $row2[$i]['tahun']) {
                             echo "<td style='text-align:right;'>".$row2[$i]['lembar']."</td>
                                     <td style='text-align:right;'>Rp".number_format($row2[$i]['total'],0,',','.')."</td>";
+                            echo "<td style='text-align:right;'>".($row['lembar']-$row2[$i]['lembar'])."</td>
+                                    <td style='text-align:right;'>Rp".number_format($row['total']-$row2[$i]['total'],0,',','.')."</td>";
                             $i++;
                         } else {
-                            echo "<td></td><td></td>";
+                            echo "<td></td><td></td><td></td><td></td>";
                         }
                         echo "</tr>";
                     }

@@ -24,6 +24,7 @@
                 <th>Data Awal</th>
                 <th colspan="2">Sebelum Migrasi</th>
                 <th colspan="2">Setelah Migrasi</th>
+                <th colspan="2">Selisih</th>
             </tr>
         </thead>
         <tbody>
@@ -33,10 +34,12 @@
                 <td>Rekair</td>
                 <td>Lembar</td>
                 <td>Rekair</td>
+                <td>Lembar</td>
+                <td>Rekair</td>
             </tr>
             <?php 
                 require_once('connection.php');
-                $sql = "SELECT LEFT(periode,4) AS tahun, COUNT(*) AS lembar, SUM(dn_met+adm+r1+r2+r3+r4) as rekair FROM ppubilling.rekair GROUP BY LEFT(periode,4)";
+                $sql = "SELECT LEFT(periode,4) AS tahun, COUNT(*) AS lembar, SUM(dnmet+adm+r1+r2+r3+r4) as rekair FROM ppubilling.rekair WHERE statrek = 'A' GROUP BY LEFT(periode,4)";
                 $result = $conn->query($sql);
                 $sql2 = "SELECT LEFT(periode, 4) AS tahun, COUNT(*) AS lembar, SUM(rekair) AS rekair FROM ppu_loket_tes.piutang GROUP BY LEFT(periode, 4)";
                 $result2 = $conn->query($sql2);
@@ -56,9 +59,11 @@
                             $rekair = $row2[$i]['rekair']+$row3[$i]['rekair'];
                             echo "<td style='text-align:right;'>".$lembar."</td>
                                     <td style='text-align:right;'>Rp".number_format($rekair,0,',','.')."</td>";
+                            echo "<td style='text-align:right;'>".($row['lembar']-$lembar)."</td>
+                                    <td style='text-align:right;'>Rp".number_format($row['rekair']-$rekair,0,',','.')."</td>";
                             $i++;
                         } else {
-                            echo "<td></td><td></td>";
+                            echo "<td></td><td></td><td></td><td></td>";
                         }
                         echo "</tr>";
                     }
